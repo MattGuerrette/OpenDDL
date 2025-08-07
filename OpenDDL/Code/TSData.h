@@ -16,9 +16,13 @@
 
 
 #include "TSArray.h"
-#include "TSString.h"
 #include "TSHalf.h"
 #include "TSTools.h"
+#include "TSText.h"
+
+#include <string>
+#include <string_view>
+#include <vector>
 
 
 #define TERATHON_DATA 1
@@ -154,17 +158,17 @@ namespace Terathon
 	{
 		extern const int8 identifierCharState[256];
 
-		TERATHON_API int32 GetWhitespaceLength(const char *text);
+		TERATHON_API int32 GetWhitespaceLength(std::string_view text);
 
-		TERATHON_API DataResult ReadDataType(const char *text, int32 *textLength, DataType *value);
-		TERATHON_API DataResult ReadIdentifier(const char *text, int32 *textLength);
-		TERATHON_API DataResult ReadIdentifier(const char *text, int32 *textLength, char *restrict identifier);
-		TERATHON_API DataResult ReadStringLiteral(const char *text, int32 *textLength, int32 *stringLength, char *restrict string = nullptr);
-		TERATHON_API DataResult ReadBoolLiteral(const char *text, int32 *textLength, bool *value);
-		TERATHON_API DataResult ReadIntegerLiteral(const char *text, int32 *textLength, uint64 *value);
+		TERATHON_API DataResult ReadDataType(std::string_view text, int32 *textLength, DataType *value);
+		TERATHON_API DataResult ReadIdentifier(std::string_view text, int32 *textLength);
+		TERATHON_API DataResult ReadIdentifier(std::string_view text, int32 *textLength, std::string& identifier);
+		TERATHON_API DataResult ReadStringLiteral(std::string_view text, int32 *textLength, int32 *stringLength, char *restrict string = nullptr);
+		TERATHON_API DataResult ReadBoolLiteral(std::string_view text, int32 *textLength, bool *value);
+		TERATHON_API DataResult ReadIntegerLiteral(std::string_view text, int32 *textLength, uint64 *value);
 
 		template <typename type>
-		TERATHON_API DataResult ReadFloatLiteral(const char *text, int32 *textLength, type *value);
+		TERATHON_API DataResult ReadFloatLiteral(std::string_view text, int32 *textLength, type *value);
 	}
 
 
@@ -263,7 +267,7 @@ namespace Terathon
 	{
 		private:
 
-			Array<String<>, 1>		nameArray;
+			std::vector<std::string>		nameArray;
 			bool					globalRefFlag;
 
 		public:
@@ -271,7 +275,7 @@ namespace Terathon
 			TERATHON_API StructureRef(bool global = true);
 			TERATHON_API ~StructureRef();
 
-			const ImmutableArray<String<>>& GetNameArray(void) const
+			const std::vector<std::string>& GetNameArray(void) const
 			{
 				return (nameArray);
 			}
@@ -281,9 +285,9 @@ namespace Terathon
 				return (globalRefFlag);
 			}
 
-			void AddName(String<>&& name)
+			void AddName(std::string_view name)
 			{
-				nameArray.AppendArrayElement(static_cast<String<>&&>(name));
+                nameArray.emplace_back(name);
 			}
 
 			TERATHON_API void ResetRef(bool global = true);
@@ -455,7 +459,7 @@ namespace Terathon
 
 	struct StringDataType
 	{
-		typedef String<> PrimType;
+		typedef std::string PrimType;
 
 		enum : DataType
 		{

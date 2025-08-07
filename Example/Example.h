@@ -47,7 +47,7 @@ class ExampleDataDescription : public DataDescription
 		ExampleDataDescription();
 		~ExampleDataDescription();
 
-		Structure *CreateStructure(const String<>& identifier) const override;
+		Structure *CreateStructure(std::string_view identifier) const override;
 };
 
 

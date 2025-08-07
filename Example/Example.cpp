@@ -28,7 +28,7 @@ ExampleDataDescription::ExampleDataDescription() {}
 ExampleDataDescription::~ExampleDataDescription() {}
 
 Structure *
-ExampleDataDescription::CreateStructure(const String<> &identifier) const {
+ExampleDataDescription::CreateStructure(std::string_view identifier) const {
     // This function is called for each structure identifier encountered
     // in an OpenDDL file. In this example, we only recognize the identifier
     // "Example", and if matched, we return a new instance of ExampleStructure.

@@ -78,21 +78,21 @@ namespace Terathon
 		};
 
 
-		int32 ReadEscapeChar(const char *text, uint32 *value);
-		int32 ReadStringEscapeChar(const char *text, int32 *stringLength, char *restrict string);
-		DataResult ReadCharLiteral(const char *text, int32 *textLength, uint64 *value);
-		DataResult ReadDecimalLiteral(const char *text, int32 *textLength, uint64 *value);
-		DataResult ReadHexadecimalLiteral(const char *text, int32 *textLength, uint64 *value);
-		DataResult ReadOctalLiteral(const char *text, int32 *textLength, uint64 *value);
-		DataResult ReadBinaryLiteral(const char *text, int32 *textLength, uint64 *value);
+		int32 ReadEscapeChar(std::string_view text, uint32 *value);
+		int32 ReadStringEscapeChar(std::string_view text, int32 *stringLength, char *restrict string);
+		DataResult ReadCharLiteral(const std::string_view text, int32 *textLength, uint64 *value);
+        DataResult ReadDecimalLiteral(const std::string_view text, int32 *textLength, uint64 *value);
+		DataResult ReadHexadecimalLiteral(const std::string_view text, int32 *textLength, uint64 *value);
+		DataResult ReadOctalLiteral(const std::string_view text, int32 *textLength, uint64 *value);
+		DataResult ReadBinaryLiteral(const std::string_view text, int32 *textLength, uint64 *value);
 		bool ParseSign(const char *& text);
 	}
 }
 
 
-int32 Data::GetWhitespaceLength(const char *text)
+int32 Data::GetWhitespaceLength(const std::string_view text)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 	for (;;)
 	{
 		uint32 c = byte[0];
@@ -160,12 +160,12 @@ int32 Data::GetWhitespaceLength(const char *text)
 	}
 
 	end:
-	return (int32(reinterpret_cast<const char *>(byte) - text));
+	return (int32(reinterpret_cast<const char *>(byte) - text.data()));
 }
 
-DataResult Data::ReadDataType(const char *text, int32 *textLength, DataType *value)
+DataResult Data::ReadDataType(const std::string_view text, int32 *textLength, DataType *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 
 	uint32 c = byte[0];
 	if (c == 'i')
@@ -353,9 +353,9 @@ DataResult Data::ReadDataType(const char *text, int32 *textLength, DataType *val
 	return (kDataTypeInvalid);
 }
 
-DataResult Data::ReadIdentifier(const char *text, int32 *textLength)
+DataResult Data::ReadIdentifier(const std::string_view text, int32 *textLength)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 	int32 count = 0;
 
 	uint32 c = byte[0];
@@ -398,9 +398,9 @@ DataResult Data::ReadIdentifier(const char *text, int32 *textLength)
 	return (kDataIdentifierEmpty);
 }
 
-DataResult Data::ReadIdentifier(const char *text, int32 *textLength, char *restrict identifier)
+DataResult Data::ReadIdentifier(const std::string_view text, int32 *textLength, std::string& identifier)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 	int32 count = 0;
 
 	uint32 c = byte[0];
@@ -449,9 +449,9 @@ DataResult Data::ReadIdentifier(const char *text, int32 *textLength, char *restr
 	return (kDataIdentifierEmpty);
 }
 
-int32 Data::ReadEscapeChar(const char *text, uint32 *value)
+int32 Data::ReadEscapeChar(const std::string_view text, uint32 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 	uint32 c = byte[0];
 
 	if ((c == '\"') || (c == '\'') || (c == '?') || (c == '\\'))
@@ -519,9 +519,9 @@ int32 Data::ReadEscapeChar(const char *text, uint32 *value)
 	return (0);
 }
 
-int32 Data::ReadStringEscapeChar(const char *text, int32 *stringLength, char *restrict string)
+int32 Data::ReadStringEscapeChar(const std::string_view text, int32 *stringLength, char *restrict string)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 	uint32 c = byte[0];
 
 	if (c == 'u')
@@ -614,9 +614,9 @@ int32 Data::ReadStringEscapeChar(const char *text, int32 *stringLength, char *re
 	return (0);
 }
 
-DataResult Data::ReadStringLiteral(const char *text, int32 *textLength, int32 *stringLength, char *restrict string)
+DataResult Data::ReadStringLiteral(const std::string_view text, int32 *textLength, int32 *stringLength, char *restrict string)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 	int32 count = 0;
 
 	for (;;)
@@ -673,14 +673,14 @@ DataResult Data::ReadStringLiteral(const char *text, int32 *textLength, int32 *s
 		}
 	}
 
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	*stringLength = count;
 	return (kDataOkay);
 }
 
-DataResult Data::ReadBoolLiteral(const char *text, int32 *textLength, bool *value)
+DataResult Data::ReadBoolLiteral(const std::string_view text, int32 *textLength, bool *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 
 	uint32 c = byte[0];
 	if (c - '0' < 2U)
@@ -714,9 +714,9 @@ DataResult Data::ReadBoolLiteral(const char *text, int32 *textLength, bool *valu
 	return (kDataBoolInvalid);
 }
 
-DataResult Data::ReadDecimalLiteral(const char *text, int32 *textLength, uint64 *value)
+DataResult Data::ReadDecimalLiteral(const std::string_view text, int32 *textLength, uint64 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 
 	uint64 v = 0;
 	bool digitFlag = false;
@@ -757,13 +757,13 @@ DataResult Data::ReadDecimalLiteral(const char *text, int32 *textLength, uint64 
 	}
 
 	*value = v;
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	return (kDataOkay);
 }
 
-DataResult Data::ReadHexadecimalLiteral(const char *text, int32 *textLength, uint64 *value)
+DataResult Data::ReadHexadecimalLiteral(const std::string_view text, int32 *textLength, uint64 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text + 2);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data() + 2);
 
 	uint64 v = 0;
 	bool digitFlag = false;
@@ -803,13 +803,13 @@ DataResult Data::ReadHexadecimalLiteral(const char *text, int32 *textLength, uin
 	}
 
 	*value = v;
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	return (kDataOkay);
 }
 
-DataResult Data::ReadOctalLiteral(const char *text, int32 *textLength, uint64 *value)
+DataResult Data::ReadOctalLiteral(const std::string_view text, int32 *textLength, uint64 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text + 2);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data() + 2);
 
 	uint64 v = 0;
 	bool digitFlag = false;
@@ -850,13 +850,13 @@ DataResult Data::ReadOctalLiteral(const char *text, int32 *textLength, uint64 *v
 	}
 
 	*value = v;
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	return (kDataOkay);
 }
 
-DataResult Data::ReadBinaryLiteral(const char *text, int32 *textLength, uint64 *value)
+DataResult Data::ReadBinaryLiteral(const std::string_view text, int32 *textLength, uint64 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text + 2);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data() + 2);
 
 	uint64 v = 0;
 	bool digitFlag = false;
@@ -890,13 +890,13 @@ DataResult Data::ReadBinaryLiteral(const char *text, int32 *textLength, uint64 *
 	}
 
 	*value = v;
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	return (kDataOkay);
 }
 
-DataResult Data::ReadCharLiteral(const char *text, int32 *textLength, uint64 *value)
+DataResult Data::ReadCharLiteral(const std::string_view text, int32 *textLength, uint64 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 
 	uint64 v = 0;
 	for (;;)
@@ -943,13 +943,13 @@ DataResult Data::ReadCharLiteral(const char *text, int32 *textLength, uint64 *va
 	}
 
 	*value = v;
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	return (kDataOkay);
 }
 
-DataResult Data::ReadIntegerLiteral(const char *text, int32 *textLength, uint64 *value)
+DataResult Data::ReadIntegerLiteral(const std::string_view text, int32 *textLength, uint64 *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 
 	uint32 c = byte[0];
 	if (c == '0')
@@ -993,9 +993,9 @@ DataResult Data::ReadIntegerLiteral(const char *text, int32 *textLength, uint64 
 }
 
 template <typename type>
-DataResult Data::ReadFloatLiteral(const char *text, int32 *textLength, type *value)
+DataResult Data::ReadFloatLiteral(const std::string_view text, int32 *textLength, type *value)
 {
-	const uint8 *byte = reinterpret_cast<const uint8 *>(text);
+	const uint8 *byte = reinterpret_cast<const uint8 *>(text.data());
 
 	uint32 c = byte[0];
 	if (c == '0')
@@ -1190,13 +1190,13 @@ DataResult Data::ReadFloatLiteral(const char *text, int32 *textLength, type *val
 	}
 
 	*value = type(v);
-	*textLength = int32(reinterpret_cast<const char *>(byte) - text);
+	*textLength = int32(reinterpret_cast<const char *>(byte) - text.data());
 	return (kDataOkay);
 }
 
-template DataResult Data::ReadFloatLiteral(const char *text, int32 *textLength, Half *value);
-template DataResult Data::ReadFloatLiteral(const char *text, int32 *textLength, float *value);
-template DataResult Data::ReadFloatLiteral(const char *text, int32 *textLength, double *value);
+template DataResult Data::ReadFloatLiteral(const std::string_view text, int32 *textLength, Half *value);
+template DataResult Data::ReadFloatLiteral(const std::string_view text, int32 *textLength, float *value);
+template DataResult Data::ReadFloatLiteral(const std::string_view text, int32 *textLength, double *value);
 
 bool Data::ParseSign(const char *& text)
 {
@@ -1230,7 +1230,7 @@ StructureRef::~StructureRef()
 
 void StructureRef::ResetRef(bool global)
 {
-	nameArray.PurgeArray();
+    nameArray.clear();
 	globalRefFlag = global;
 }
 
@@ -1238,8 +1238,8 @@ bool StructureRef::operator ==(const StructureRef& ref) const
 {
 	if (globalRefFlag == ref.globalRefFlag)
 	{
-		int32 count = nameArray.GetArrayElementCount();
-		if (ref.nameArray.GetArrayElementCount() == count)
+        size_t count = nameArray.size();
+		if (ref.nameArray.size() == count)
 		{
 			for (machine a = 0; a < count; a++)
 			{
@@ -1693,7 +1693,7 @@ DataResult StringDataType::ParseValue(const char *& text, PrimType *value)
 
 		if (value)
 		{
-			value->SetStringLength(accumLength + stringLength);
+			value->resize(accumLength + stringLength);
 			Data::ReadStringLiteral(text, &textLength, &stringLength, &(*value)[accumLength]);
 			accumLength += stringLength;
 		}
@@ -1752,14 +1752,15 @@ DataResult RefDataType::ParseValue(const char *& text, PrimType *value)
 			return (result);
 		}
 
-		String<>	string;
+		std::string	string;
+        string.resize(textLength);
 
-		string.SetStringLength(textLength);
 		Data::ReadIdentifier(text, &textLength, string);
+        
 
 		if (value)
 		{
-			value->AddName(static_cast<String<>&&>(string));
+			value->AddName(string);
 		}
 
 		text += textLength;

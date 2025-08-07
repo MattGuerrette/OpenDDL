@@ -10,6 +10,8 @@
 #include "TSOpenDDL.h"
 #include "TSTools.h"
 
+#include <string>
+
 
 using namespace Terathon;
 
@@ -297,12 +299,12 @@ Structure *Structure::FindStructure(const StructureRef& reference, int32 index) 
 {
 	if ((index != 0) || (!reference.GetGlobalRefFlag()))
 	{
-		const ImmutableArray<String<>>& nameArray = reference.GetNameArray();
+		const auto& nameArray = reference.GetNameArray();
 
-		int32 count = nameArray.GetArrayElementCount();
+        size_t count = nameArray.size();
 		if (count != 0)
 		{
-			Structure *structure = structureMap.FindMapElement(nameArray[index]);
+			Structure *structure = structureMap.FindMapElement(nameArray[index].data());
 			if (structure)
 			{
 				if (++index < count)
@@ -318,7 +320,7 @@ Structure *Structure::FindStructure(const StructureRef& reference, int32 index) 
 	return (nullptr);
 }
 
-bool Structure::ValidateProperty(const DataDescription *dataDescription, const String<>& identifier, DataType *type, void **value)
+bool Structure::ValidateProperty(const DataDescription *dataDescription, std::string_view identifier, DataType *type, void **value)
 {
 	return (false);
 }
@@ -328,7 +330,7 @@ bool Structure::ValidateSubstructure(const DataDescription *dataDescription, con
 	return (true);
 }
 
-bool Structure::GetStateValue(const String<>& identifier, uint32 *state) const
+bool Structure::GetStateValue(std::string_view identifier, uint32 *state) const
 {
 	return (false);
 }
@@ -440,9 +442,9 @@ DataResult DataStructure<type>::ParseData(const char *& text)
 				DataResult result = Data::ReadIdentifier(text, &length);
 				if (result == kDataOkay)
 				{
-					String<>	identifier;
+					std::string	identifier;
 
-					identifier.SetStringLength(length);
+					identifier.resize(length);
 					Data::ReadIdentifier(text, &length, identifier);
 					if (!superStructure->GetStateValue(identifier, &stateValue))
 					{
@@ -577,12 +579,12 @@ Structure *DataDescription::FindStructure(const StructureRef& reference) const
 {
 	if (reference.GetGlobalRefFlag())
 	{
-		const ImmutableArray<String<>>& nameArray = reference.GetNameArray();
+		const auto& nameArray = reference.GetNameArray();
 
-		int32 count = nameArray.GetArrayElementCount();
+		size_t count = nameArray.size();
 		if (count != 0)
 		{
-			Structure *structure = structureMap.FindMapElement(nameArray[0]);
+			Structure *structure = structureMap.FindMapElement(nameArray[0].data());
 			if ((structure) && (count > 1))
 			{
 				structure = structure->FindStructure(reference, 1);
@@ -595,7 +597,7 @@ Structure *DataDescription::FindStructure(const StructureRef& reference) const
 	return (nullptr);
 }
 
-Structure *DataDescription::CreatePrimitive(const String<>& identifier)
+Structure *DataDescription::CreatePrimitive(const std::string_view identifier)
 {
 	int32		length;
 	DataType	value;
@@ -642,7 +644,7 @@ Structure *DataDescription::CreatePrimitive(const String<>& identifier)
 	return (nullptr);
 }
 
-Structure *DataDescription::CreateStructure(const String<>& identifier) const
+Structure *DataDescription::CreateStructure(std::string_view identifier) const
 {
 	return (nullptr);
 }
@@ -671,9 +673,9 @@ DataResult DataDescription::ParseProperties(const char *& text, Structure *struc
 			return (result);
 		}
 
-		String<>	identifier;
+		std::string	identifier;
 
-		identifier.SetStringLength(length);
+		identifier.resize(length);
 		Data::ReadIdentifier(text, &length, identifier);
 
 		text += length;
@@ -828,9 +830,8 @@ DataResult DataDescription::ParseStructures(const char *& text, Structure *root)
 			return (result);
 		}
 
-		String<>	identifier;
-
-		identifier.SetStringLength(length);
+		std::string	identifier;
+        identifier.resize(length);
 		Data::ReadIdentifier(text, &length, identifier);
 
 		bool primitiveFlag = false;
@@ -851,7 +852,7 @@ DataResult DataDescription::ParseStructures(const char *& text, Structure *root)
 			}
 		}
 
-		identifier.PurgeString();
+        identifier.clear();
 
 		Holder<Structure> structureHolder = structure;
 		structure->textLocation = text;
@@ -922,7 +923,8 @@ DataResult DataDescription::ParseStructures(const char *& text, Structure *root)
 				return (result);
 			}
 
-			Data::ReadIdentifier(text, &length, structure->structureName.SetStringLength(length));
+            structure->structureName.resize(length);
+			Data::ReadIdentifier(text, &length, structure->structureName);
 
 			bool global = (c == '$');
 			structure->globalNameFlag = global;

@@ -330,14 +330,14 @@ namespace Terathon
 
 		public:
 
-			typedef ConstCharKey KeyType;
+			typedef std::string KeyType;
 
 		private:
 
 			StructureType		structureType;
 			StructureType		baseStructureType;
 
-			String<>			structureName;
+			std::string			structureName;
 			bool				globalNameFlag;
 
 			Map<Structure>		structureMap;
@@ -374,7 +374,7 @@ namespace Terathon
 
 			const char *GetStructureName(void) const
 			{
-				return (structureName);
+				return (structureName.data());
 			}
 
 			void SetStructureName(const char *name)
@@ -397,10 +397,10 @@ namespace Terathon
 
 			TERATHON_API Structure *FindStructure(const StructureRef& reference, int32 index = 0) const;
 
-			TERATHON_API virtual bool ValidateProperty(const DataDescription *dataDescription, const String<>& identifier, DataType *type, void **value);
+			TERATHON_API virtual bool ValidateProperty(const DataDescription *dataDescription, std::string_view identifier, DataType *type, void **value);
 			TERATHON_API virtual bool ValidateSubstructure(const DataDescription *dataDescription, const Structure *structure) const;
 
-			TERATHON_API virtual bool GetStateValue(const String<>& identifier, uint32 *state) const;
+			TERATHON_API virtual bool GetStateValue(std::string_view identifier, uint32 *state) const;
 			TERATHON_API virtual DataResult ProcessData(DataDescription *dataDescription);
 	};
 
@@ -879,7 +879,7 @@ namespace Terathon
 			const Structure		*errorStructure;
 			int32				errorLine;
 
-			static Structure *CreatePrimitive(const String<>& identifier);
+			static Structure *CreatePrimitive(const std::string_view identifier);
 
 			DataResult ParseProperties(const char *& text, Structure *structure);
 			DataResult ParseStructures(const char *& text, Structure *root);
@@ -914,7 +914,7 @@ namespace Terathon
 
 			TERATHON_API Structure *FindStructure(const StructureRef& reference) const;
 
-			TERATHON_API virtual Structure *CreateStructure(const String<>& identifier) const;
+			TERATHON_API virtual Structure *CreateStructure(std::string_view identifier) const;
 			TERATHON_API virtual bool ValidateTopLevelStructure(const Structure *structure) const;
 
 			TERATHON_API virtual DataResult ProcessData(void);
