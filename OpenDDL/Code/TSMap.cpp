@@ -6,749 +6,745 @@
 // Separate proprietary licenses are available from Terathon Software.
 //
 
-
 #include "TSMap.h"
 #include "TSBasic.h"
 
-
 using namespace Terathon;
-
 
 MapElementBase::~MapElementBase()
 {
-	if (owningMap)
-	{
-		owningMap->RemoveMapElement(this);
-	}
+    if (owningMap)
+    {
+        owningMap->RemoveMapElement(this);
+    }
 }
 
 void MapElementBase::Detach(void)
 {
-	if (owningMap)
-	{
-		owningMap->RemoveMapElement(this);
-	}
+    if (owningMap)
+    {
+        owningMap->RemoveMapElement(this);
+    }
 }
 
-MapElementBase *MapElementBase::GetFirstMapElement(void)
+MapElementBase* MapElementBase::GetFirstMapElement(void)
 {
-	MapElementBase *element = this;
-	for (;;)
-	{
-		MapElementBase *left = element->leftSubnode;
-		if (!left)
-		{
-			break;
-		}
+    MapElementBase* element = this;
+    for (;;)
+    {
+        MapElementBase* left = element->leftSubnode;
+        if (!left)
+        {
+            break;
+        }
 
-		element = left;
-	}
+        element = left;
+    }
 
-	return (element);
+    return (element);
 }
 
-MapElementBase *MapElementBase::GetLastMapElement(void)
+MapElementBase* MapElementBase::GetLastMapElement(void)
 {
-	MapElementBase *element = this;
-	for (;;)
-	{
-		MapElementBase *right = element->rightSubnode;
-		if (!right)
-		{
-			break;
-		}
+    MapElementBase* element = this;
+    for (;;)
+    {
+        MapElementBase* right = element->rightSubnode;
+        if (!right)
+        {
+            break;
+        }
 
-		element = right;
-	}
+        element = right;
+    }
 
-	return (element);
+    return (element);
 }
 
-MapElementBase *MapElementBase::GetPreviousMapElement(void) const
+MapElementBase* MapElementBase::GetPreviousMapElement(void) const
 {
-	if (leftSubnode)
-	{
-		return (leftSubnode->GetLastMapElement());
-	}
+    if (leftSubnode)
+    {
+        return (leftSubnode->GetLastMapElement());
+    }
 
-	const MapElementBase *element = this;
-	for (;;)
-	{
-		MapElementBase *super = element->superNode;
-		if (!super)
-		{
-			break;
-		}
+    const MapElementBase* element = this;
+    for (;;)
+    {
+        MapElementBase* super = element->superNode;
+        if (!super)
+        {
+            break;
+        }
 
-		if (super->rightSubnode == element)
-		{
-			return (super);
-		}
+        if (super->rightSubnode == element)
+        {
+            return (super);
+        }
 
-		element = super;
-	}
+        element = super;
+    }
 
-	return (nullptr);
+    return (nullptr);
 }
 
-MapElementBase *MapElementBase::GetNextMapElement(void) const
+MapElementBase* MapElementBase::GetNextMapElement(void) const
 {
-	if (rightSubnode)
-	{
-		return (rightSubnode->GetFirstMapElement());
-	}
+    if (rightSubnode)
+    {
+        return (rightSubnode->GetFirstMapElement());
+    }
 
-	const MapElementBase *element = this;
-	for (;;)
-	{
-		MapElementBase *super = element->superNode;
-		if (!super)
-		{
-			break;
-		}
+    const MapElementBase* element = this;
+    for (;;)
+    {
+        MapElementBase* super = element->superNode;
+        if (!super)
+        {
+            break;
+        }
 
-		if (super->leftSubnode == element)
-		{
-			return (super);
-		}
+        if (super->leftSubnode == element)
+        {
+            return (super);
+        }
 
-		element = super;
-	}
+        element = super;
+    }
 
-	return (nullptr);
+    return (nullptr);
 }
 
 void MapElementBase::RemoveSubtree(void)
 {
-	if (leftSubnode)
-	{
-		leftSubnode->RemoveSubtree();
-	}
+    if (leftSubnode)
+    {
+        leftSubnode->RemoveSubtree();
+    }
 
-	if (rightSubnode)
-	{
-		rightSubnode->RemoveSubtree();
-	}
+    if (rightSubnode)
+    {
+        rightSubnode->RemoveSubtree();
+    }
 
-	superNode = nullptr;
-	leftSubnode = nullptr;
-	rightSubnode = nullptr;
-	owningMap = nullptr;
+    superNode = nullptr;
+    leftSubnode = nullptr;
+    rightSubnode = nullptr;
+    owningMap = nullptr;
 }
 
 void MapElementBase::DeleteSubtree(void)
 {
-	if (leftSubnode)
-	{
-		leftSubnode->DeleteSubtree();
-	}
+    if (leftSubnode)
+    {
+        leftSubnode->DeleteSubtree();
+    }
 
-	if (rightSubnode)
-	{
-		rightSubnode->DeleteSubtree();
-	}
+    if (rightSubnode)
+    {
+        rightSubnode->DeleteSubtree();
+    }
 
-	owningMap = nullptr;
-	delete this;
+    owningMap = nullptr;
+    delete this;
 }
-
 
 MapBase::~MapBase()
 {
-	PurgeMap();
+    PurgeMap();
 }
 
-MapElementBase *MapBase::operator [](machine index) const
+MapElementBase* MapBase::operator[](machine index) const
 {
-	machine i = 0;
-	MapElementBase *element = GetFirstMapElement();
-	while (element)
-	{
-		if (i == index)
-		{
-			return (element);
-		}
+    machine         i = 0;
+    MapElementBase* element = GetFirstMapElement();
+    while (element)
+    {
+        if (i == index)
+        {
+            return (element);
+        }
 
-		i++;
-		element = element->GetNextMapElement();
-	}
+        i++;
+        element = element->GetNextMapElement();
+    }
 
-	return (nullptr);
+    return (nullptr);
 }
 
 int32 MapBase::GetMapElementCount(void) const
 {
-	machine count = 0;
-	const MapElementBase *element = GetFirstMapElement();
-	while (element)
-	{
-		count++;
-		element = element->GetNextMapElement();
-	}
+    machine               count = 0;
+    const MapElementBase* element = GetFirstMapElement();
+    while (element)
+    {
+        count++;
+        element = element->GetNextMapElement();
+    }
 
-	return (int32(count));
+    return (int32(count));
 }
 
-MapElementBase *MapBase::RotateLeft(MapElementBase *node)
+MapElementBase* MapBase::RotateLeft(MapElementBase* node)
 {
-	MapElementBase *right = node->rightSubnode;
+    MapElementBase* right = node->rightSubnode;
 
-	if (node != rootElement)
-	{
-		MapElementBase *super = node->superNode;
+    if (node != rootElement)
+    {
+        MapElementBase* super = node->superNode;
 
-		if (super->leftSubnode == node)
-		{
-			super->leftSubnode = right;
-		}
-		else
-		{
-			super->rightSubnode = right;
-		}
+        if (super->leftSubnode == node)
+        {
+            super->leftSubnode = right;
+        }
+        else
+        {
+            super->rightSubnode = right;
+        }
 
-		right->superNode = super;
-	}
-	else
-	{
-		rootElement = right;
-		right->superNode = nullptr;
-	}
+        right->superNode = super;
+    }
+    else
+    {
+        rootElement = right;
+        right->superNode = nullptr;
+    }
 
-	MapElementBase *subnode = right->leftSubnode;
-	if (subnode)
-	{
-		subnode->superNode = node;
-	}
+    MapElementBase* subnode = right->leftSubnode;
+    if (subnode)
+    {
+        subnode->superNode = node;
+    }
 
-	node->rightSubnode = subnode;
+    node->rightSubnode = subnode;
 
-	right->leftSubnode = node;
-	node->superNode = right;
-	node->balance = -(--right->balance);
+    right->leftSubnode = node;
+    node->superNode = right;
+    node->balance = -(--right->balance);
 
-	return (right);
+    return (right);
 }
 
-MapElementBase *MapBase::RotateRight(MapElementBase *node)
+MapElementBase* MapBase::RotateRight(MapElementBase* node)
 {
-	MapElementBase *left = node->leftSubnode;
+    MapElementBase* left = node->leftSubnode;
 
-	if (node != rootElement)
-	{
-		MapElementBase *super = node->superNode;
+    if (node != rootElement)
+    {
+        MapElementBase* super = node->superNode;
 
-		if (super->leftSubnode == node)
-		{
-			super->leftSubnode = left;
-		}
-		else
-		{
-			super->rightSubnode = left;
-		}
+        if (super->leftSubnode == node)
+        {
+            super->leftSubnode = left;
+        }
+        else
+        {
+            super->rightSubnode = left;
+        }
 
-		left->superNode = super;
-	}
-	else
-	{
-		rootElement = left;
-		left->superNode = nullptr;
-	}
+        left->superNode = super;
+    }
+    else
+    {
+        rootElement = left;
+        left->superNode = nullptr;
+    }
 
-	MapElementBase *subnode = left->rightSubnode;
-	if (subnode)
-	{
-		subnode->superNode = node;
-	}
+    MapElementBase* subnode = left->rightSubnode;
+    if (subnode)
+    {
+        subnode->superNode = node;
+    }
 
-	node->leftSubnode = subnode;
+    node->leftSubnode = subnode;
 
-	left->rightSubnode = node;
-	node->superNode = left;
-	node->balance = -(++left->balance);
+    left->rightSubnode = node;
+    node->superNode = left;
+    node->balance = -(++left->balance);
 
-	return (left);
+    return (left);
 }
 
-MapElementBase *MapBase::ZigZagLeft(MapElementBase *node)
+MapElementBase* MapBase::ZigZagLeft(MapElementBase* node)
 {
-	MapElementBase *right = node->rightSubnode;
-	MapElementBase *top = right->leftSubnode;
+    MapElementBase* right = node->rightSubnode;
+    MapElementBase* top = right->leftSubnode;
 
-	if (node != rootElement)
-	{
-		MapElementBase *super = node->superNode;
+    if (node != rootElement)
+    {
+        MapElementBase* super = node->superNode;
 
-		if (super->leftSubnode == node)
-		{
-			super->leftSubnode = top;
-		}
-		else
-		{
-			super->rightSubnode = top;
-		}
+        if (super->leftSubnode == node)
+        {
+            super->leftSubnode = top;
+        }
+        else
+        {
+            super->rightSubnode = top;
+        }
 
-		top->superNode = super;
-	}
-	else
-	{
-		rootElement = top;
-		top->superNode = nullptr;
-	}
+        top->superNode = super;
+    }
+    else
+    {
+        rootElement = top;
+        top->superNode = nullptr;
+    }
 
-	MapElementBase *subLeft = top->leftSubnode;
-	if (subLeft)
-	{
-		subLeft->superNode = node;
-	}
+    MapElementBase* subLeft = top->leftSubnode;
+    if (subLeft)
+    {
+        subLeft->superNode = node;
+    }
 
-	node->rightSubnode = subLeft;
+    node->rightSubnode = subLeft;
 
-	MapElementBase *subRight = top->rightSubnode;
-	if (subRight)
-	{
-		subRight->superNode = right;
-	}
+    MapElementBase* subRight = top->rightSubnode;
+    if (subRight)
+    {
+        subRight->superNode = right;
+    }
 
-	right->leftSubnode = subRight;
+    right->leftSubnode = subRight;
 
-	top->leftSubnode = node;
-	top->rightSubnode = right;
-	node->superNode = top;
-	right->superNode = top;
+    top->leftSubnode = node;
+    top->rightSubnode = right;
+    node->superNode = top;
+    right->superNode = top;
 
-	int32 b = top->balance;
-	node->balance = -MaxZero(b);
-	right->balance = -MinZero(b);
-	top->balance = 0;
+    int32 b = top->balance;
+    node->balance = -MaxZero(b);
+    right->balance = -MinZero(b);
+    top->balance = 0;
 
-	return (top);
+    return (top);
 }
 
-MapElementBase *MapBase::ZigZagRight(MapElementBase *node)
+MapElementBase* MapBase::ZigZagRight(MapElementBase* node)
 {
-	MapElementBase *left = node->leftSubnode;
-	MapElementBase *top = left->rightSubnode;
+    MapElementBase* left = node->leftSubnode;
+    MapElementBase* top = left->rightSubnode;
 
-	if (node != rootElement)
-	{
-		MapElementBase *super = node->superNode;
+    if (node != rootElement)
+    {
+        MapElementBase* super = node->superNode;
 
-		if (super->leftSubnode == node)
-		{
-			super->leftSubnode = top;
-		}
-		else
-		{
-			super->rightSubnode = top;
-		}
+        if (super->leftSubnode == node)
+        {
+            super->leftSubnode = top;
+        }
+        else
+        {
+            super->rightSubnode = top;
+        }
 
-		top->superNode = super;
-	}
-	else
-	{
-		rootElement = top;
-		top->superNode = nullptr;
-	}
+        top->superNode = super;
+    }
+    else
+    {
+        rootElement = top;
+        top->superNode = nullptr;
+    }
 
-	MapElementBase *subLeft = top->leftSubnode;
-	if (subLeft)
-	{
-		subLeft->superNode = left;
-	}
+    MapElementBase* subLeft = top->leftSubnode;
+    if (subLeft)
+    {
+        subLeft->superNode = left;
+    }
 
-	left->rightSubnode = subLeft;
+    left->rightSubnode = subLeft;
 
-	MapElementBase *subRight = top->rightSubnode;
-	if (subRight)
-	{
-		subRight->superNode = node;
-	}
+    MapElementBase* subRight = top->rightSubnode;
+    if (subRight)
+    {
+        subRight->superNode = node;
+    }
 
-	node->leftSubnode = subRight;
+    node->leftSubnode = subRight;
 
-	top->leftSubnode = left;
-	top->rightSubnode = node;
-	node->superNode = top;
-	left->superNode = top;
+    top->leftSubnode = left;
+    top->rightSubnode = node;
+    node->superNode = top;
+    left->superNode = top;
 
-	int32 b = top->balance;
-	node->balance = -MinZero(b);
-	left->balance = -MaxZero(b);
-	top->balance = 0;
+    int32 b = top->balance;
+    node->balance = -MinZero(b);
+    left->balance = -MaxZero(b);
+    top->balance = 0;
 
-	return (top);
+    return (top);
 }
 
-void MapBase::SetRootElement(MapElementBase *node)
+void MapBase::SetRootElement(MapElementBase* node)
 {
-	MapBase *map = node->owningMap;
-	if (map)
-	{
-		map->RemoveMapElement(node);
-	}
+    MapBase* map = node->owningMap;
+    if (map)
+    {
+        map->RemoveMapElement(node);
+    }
 
-	node->owningMap = this;
-	node->balance = 0;
+    node->owningMap = this;
+    node->balance = 0;
 
-	rootElement = node;
+    rootElement = node;
 }
 
-void MapBase::InsertLeftSubnode(MapElementBase *node, MapElementBase *subnode)
+void MapBase::InsertLeftSubnode(MapElementBase* node, MapElementBase* subnode)
 {
-	MapBase *map = subnode->owningMap;
-	if (map)
-	{
-		map->RemoveMapElement(subnode);
-	}
+    MapBase* map = subnode->owningMap;
+    if (map)
+    {
+        map->RemoveMapElement(subnode);
+    }
 
-	node->leftSubnode = subnode;
-	subnode->superNode = node;
-	subnode->owningMap = this;
-	subnode->balance = 0;
+    node->leftSubnode = subnode;
+    subnode->superNode = node;
+    subnode->owningMap = this;
+    subnode->balance = 0;
 
-	int32 b = node->balance - 1;
-	node->balance = b;
-	if (b != 0)
-	{
-		int32 dir1 = -1;
-		for (;;)
-		{
-			int32	dir2;
+    int32 b = node->balance - 1;
+    node->balance = b;
+    if (b != 0)
+    {
+        int32 dir1 = -1;
+        for (;;)
+        {
+            int32 dir2;
 
-			MapElementBase *super = node->superNode;
-			if (!super)
-			{
-				break;
-			}
+            MapElementBase* super = node->superNode;
+            if (!super)
+            {
+                break;
+            }
 
-			b = super->balance;
-			if (super->leftSubnode == node)
-			{
-				super->balance = --b;
-				dir2 = -1;
-			}
-			else
-			{
-				super->balance = ++b;
-				dir2 = 1;
-			}
+            b = super->balance;
+            if (super->leftSubnode == node)
+            {
+                super->balance = --b;
+                dir2 = -1;
+            }
+            else
+            {
+                super->balance = ++b;
+                dir2 = 1;
+            }
 
-			if (b == 0)
-			{
-				break;
-			}
+            if (b == 0)
+            {
+                break;
+            }
 
-			if (Abs(b) == 2)
-			{
-				if (dir2 == -1)
-				{
-					if (dir1 == -1)
-					{
-						RotateRight(super);
-					}
-					else
-					{
-						ZigZagRight(super);
-					}
-				}
-				else
-				{
-					if (dir1 == 1)
-					{
-						RotateLeft(super);
-					}
-					else
-					{
-						ZigZagLeft(super);
-					}
-				}
+            if (Abs(b) == 2)
+            {
+                if (dir2 == -1)
+                {
+                    if (dir1 == -1)
+                    {
+                        RotateRight(super);
+                    }
+                    else
+                    {
+                        ZigZagRight(super);
+                    }
+                }
+                else
+                {
+                    if (dir1 == 1)
+                    {
+                        RotateLeft(super);
+                    }
+                    else
+                    {
+                        ZigZagLeft(super);
+                    }
+                }
 
-				break;
-			}
+                break;
+            }
 
-			dir1 = dir2;
-			node = super;
-		}
-	}
+            dir1 = dir2;
+            node = super;
+        }
+    }
 }
 
-void MapBase::InsertRightSubnode(MapElementBase *node, MapElementBase *subnode)
+void MapBase::InsertRightSubnode(MapElementBase* node, MapElementBase* subnode)
 {
-	MapBase *map = subnode->owningMap;
-	if (map)
-	{
-		map->RemoveMapElement(subnode);
-	}
+    MapBase* map = subnode->owningMap;
+    if (map)
+    {
+        map->RemoveMapElement(subnode);
+    }
 
-	node->rightSubnode = subnode;
-	subnode->superNode = node;
-	subnode->owningMap = this;
-	subnode->balance = 0;
+    node->rightSubnode = subnode;
+    subnode->superNode = node;
+    subnode->owningMap = this;
+    subnode->balance = 0;
 
-	int32 b = node->balance + 1;
-	node->balance = b;
-	if (b != 0)
-	{
-		int32 dir1 = 1;
-		for (;;)
-		{
-			int32	dir2;
+    int32 b = node->balance + 1;
+    node->balance = b;
+    if (b != 0)
+    {
+        int32 dir1 = 1;
+        for (;;)
+        {
+            int32 dir2;
 
-			MapElementBase *super = node->superNode;
-			if (!super)
-			{
-				break;
-			}
+            MapElementBase* super = node->superNode;
+            if (!super)
+            {
+                break;
+            }
 
-			b = super->balance;
-			if (super->leftSubnode == node)
-			{
-				super->balance = --b;
-				dir2 = -1;
-			}
-			else
-			{
-				super->balance = ++b;
-				dir2 = 1;
-			}
+            b = super->balance;
+            if (super->leftSubnode == node)
+            {
+                super->balance = --b;
+                dir2 = -1;
+            }
+            else
+            {
+                super->balance = ++b;
+                dir2 = 1;
+            }
 
-			if (b == 0)
-			{
-				break;
-			}
+            if (b == 0)
+            {
+                break;
+            }
 
-			if (Abs(b) == 2)
-			{
-				if (dir2 == -1)
-				{
-					if (dir1 == -1)
-					{
-						RotateRight(super);
-					}
-					else
-					{
-						ZigZagRight(super);
-					}
-				}
-				else
-				{
-					if (dir1 == 1)
-					{
-						RotateLeft(super);
-					}
-					else
-					{
-						ZigZagLeft(super);
-					}
-				}
+            if (Abs(b) == 2)
+            {
+                if (dir2 == -1)
+                {
+                    if (dir1 == -1)
+                    {
+                        RotateRight(super);
+                    }
+                    else
+                    {
+                        ZigZagRight(super);
+                    }
+                }
+                else
+                {
+                    if (dir1 == 1)
+                    {
+                        RotateLeft(super);
+                    }
+                    else
+                    {
+                        ZigZagLeft(super);
+                    }
+                }
 
-				break;
-			}
+                break;
+            }
 
-			dir1 = dir2;
-			node = super;
-		}
-	}
+            dir1 = dir2;
+            node = super;
+        }
+    }
 }
 
-void MapBase::ReplaceMapElement(MapElementBase *element, MapElementBase *replacement)
+void MapBase::ReplaceMapElement(MapElementBase* element, MapElementBase* replacement)
 {
-	MapBase *map = replacement->owningMap;
-	if (map)
-	{
-		map->RemoveMapElement(replacement);
-	}
+    MapBase* map = replacement->owningMap;
+    if (map)
+    {
+        map->RemoveMapElement(replacement);
+    }
 
-	MapElementBase *super = element->superNode;
-	if (super)
-	{
-		if (super->leftSubnode == element)
-		{
-			super->leftSubnode = replacement;
-		}
-		else
-		{
-			super->rightSubnode = replacement;
-		}
-	}
+    MapElementBase* super = element->superNode;
+    if (super)
+    {
+        if (super->leftSubnode == element)
+        {
+            super->leftSubnode = replacement;
+        }
+        else
+        {
+            super->rightSubnode = replacement;
+        }
+    }
 
-	replacement->superNode = super;
-	replacement->balance = element->balance;
-	replacement->owningMap = this;
+    replacement->superNode = super;
+    replacement->balance = element->balance;
+    replacement->owningMap = this;
 
-	MapElementBase *subnode = element->leftSubnode;
-	replacement->leftSubnode = subnode;
-	if (subnode)
-	{
-		subnode->superNode = replacement;
-	}
+    MapElementBase* subnode = element->leftSubnode;
+    replacement->leftSubnode = subnode;
+    if (subnode)
+    {
+        subnode->superNode = replacement;
+    }
 
-	subnode = element->rightSubnode;
-	replacement->rightSubnode = subnode;
-	if (subnode)
-	{
-		subnode->superNode = replacement;
-	}
+    subnode = element->rightSubnode;
+    replacement->rightSubnode = subnode;
+    if (subnode)
+    {
+        subnode->superNode = replacement;
+    }
 
-	element->superNode = nullptr;
-	element->leftSubnode = nullptr;
-	element->rightSubnode = nullptr;
-	element->owningMap = nullptr;
+    element->superNode = nullptr;
+    element->leftSubnode = nullptr;
+    element->rightSubnode = nullptr;
+    element->owningMap = nullptr;
 }
 
-void MapBase::RemoveBranchNode(MapElementBase *node, MapElementBase *subnode)
+void MapBase::RemoveBranchNode(MapElementBase* node, MapElementBase* subnode)
 {
-	MapElementBase *super = node->superNode;
-	if (subnode)
-	{
-		subnode->superNode = super;
-	}
+    MapElementBase* super = node->superNode;
+    if (subnode)
+    {
+        subnode->superNode = super;
+    }
 
-	if (super)
-	{
-		int32	db;
+    if (super)
+    {
+        int32 db;
 
-		if (super->leftSubnode == node)
-		{
-			super->leftSubnode = subnode;
-			db = 1;
-		}
-		else
-		{
-			super->rightSubnode = subnode;
-			db = -1;
-		}
+        if (super->leftSubnode == node)
+        {
+            super->leftSubnode = subnode;
+            db = 1;
+        }
+        else
+        {
+            super->rightSubnode = subnode;
+            db = -1;
+        }
 
-		for (;;)
-		{
-			int32 b = (super->balance += db);
-			if (Abs(b) == 1)
-			{
-				break;
-			}
+        for (;;)
+        {
+            int32 b = (super->balance += db);
+            if (Abs(b) == 1)
+            {
+                break;
+            }
 
-			node = super;
-			super = super->superNode;
+            node = super;
+            super = super->superNode;
 
-			if (b != 0)
-			{
-				if (b > 0)
-				{
-					int32 rb = node->rightSubnode->balance;
-					if (rb >= 0)
-					{
-						node = RotateLeft(node);
-						if (rb == 0)
-						{
-							break;
-						}
-					}
-					else
-					{
-						node = ZigZagLeft(node);
-					}
-				}
-				else
-				{
-					int32 lb = node->leftSubnode->balance;
-					if (lb <= 0)
-					{
-						node = RotateRight(node);
-						if (lb == 0)
-						{
-							break;
-						}
-					}
-					else
-					{
-						node = ZigZagRight(node);
-					}
-				}
-			}
+            if (b != 0)
+            {
+                if (b > 0)
+                {
+                    int32 rb = node->rightSubnode->balance;
+                    if (rb >= 0)
+                    {
+                        node = RotateLeft(node);
+                        if (rb == 0)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        node = ZigZagLeft(node);
+                    }
+                }
+                else
+                {
+                    int32 lb = node->leftSubnode->balance;
+                    if (lb <= 0)
+                    {
+                        node = RotateRight(node);
+                        if (lb == 0)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        node = ZigZagRight(node);
+                    }
+                }
+            }
 
-			if (!super)
-			{
-				break;
-			}
+            if (!super)
+            {
+                break;
+            }
 
-			db = (super->leftSubnode == node) ? 1 : -1;
-		}
-	}
-	else
-	{
-		rootElement = subnode;
-	}
+            db = (super->leftSubnode == node) ? 1 : -1;
+        }
+    }
+    else
+    {
+        rootElement = subnode;
+    }
 }
 
-void MapBase::RemoveMapElement(MapElementBase *element)
+void MapBase::RemoveMapElement(MapElementBase* element)
 {
-	MapElementBase *left = element->leftSubnode;
-	MapElementBase *right = element->rightSubnode;
+    MapElementBase* left = element->leftSubnode;
+    MapElementBase* right = element->rightSubnode;
 
-	if ((left) && (right))
-	{
-		MapElementBase *top = right->GetFirstMapElement();
-		RemoveBranchNode(top, top->rightSubnode);
+    if ((left) && (right))
+    {
+        MapElementBase* top = right->GetFirstMapElement();
+        RemoveBranchNode(top, top->rightSubnode);
 
-		MapElementBase *super = element->superNode;
-		top->superNode = super;
-		if (super)
-		{
-			if (super->leftSubnode == element)
-			{
-				super->leftSubnode = top;
-			}
-			else
-			{
-				super->rightSubnode = top;
-			}
-		}
-		else
-		{
-			rootElement = top;
-		}
+        MapElementBase* super = element->superNode;
+        top->superNode = super;
+        if (super)
+        {
+            if (super->leftSubnode == element)
+            {
+                super->leftSubnode = top;
+            }
+            else
+            {
+                super->rightSubnode = top;
+            }
+        }
+        else
+        {
+            rootElement = top;
+        }
 
-		left = element->leftSubnode;
-		top->leftSubnode = left;
-		if (left)
-		{
-			left->superNode = top;
-		}
+        left = element->leftSubnode;
+        top->leftSubnode = left;
+        if (left)
+        {
+            left->superNode = top;
+        }
 
-		right = element->rightSubnode;
-		top->rightSubnode = right;
-		if (right)
-		{
-			right->superNode = top;
-		}
+        right = element->rightSubnode;
+        top->rightSubnode = right;
+        if (right)
+        {
+            right->superNode = top;
+        }
 
-		top->balance = element->balance;
-	}
-	else
-	{
-		RemoveBranchNode(element, (left) ? left : right);
-	}
+        top->balance = element->balance;
+    }
+    else
+    {
+        RemoveBranchNode(element, (left) ? left : right);
+    }
 
-	element->superNode = nullptr;
-	element->leftSubnode = nullptr;
-	element->rightSubnode = nullptr;
-	element->owningMap = nullptr;
+    element->superNode = nullptr;
+    element->leftSubnode = nullptr;
+    element->rightSubnode = nullptr;
+    element->owningMap = nullptr;
 }
 
 void MapBase::RemoveAllMapElements(void)
 {
-	if (rootElement)
-	{
-		rootElement->RemoveSubtree();
-		rootElement = nullptr;
-	}
+    if (rootElement)
+    {
+        rootElement->RemoveSubtree();
+        rootElement = nullptr;
+    }
 }
 
 void MapBase::PurgeMap(void)
 {
-	if (rootElement)
-	{
-		rootElement->DeleteSubtree();
-		rootElement = nullptr;
-	}
+    if (rootElement)
+    {
+        rootElement->DeleteSubtree();
+        rootElement = nullptr;
+    }
 }

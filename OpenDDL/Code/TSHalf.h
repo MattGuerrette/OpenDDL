@@ -6,105 +6,93 @@
 // Separate proprietary licenses are available from Terathon Software.
 //
 
-
-#ifndef TSHalf_h
-#define TSHalf_h
-
+#pragma once
 
 #include "TSPlatform.h"
 
-
 #define TERATHON_HALF 1
-
 
 namespace Terathon
 {
-	class Half
-	{
-		private:
+    class Half
+    {
+    private:
+        uint16 value;
 
-			uint16		value;
+        Half(uint16 v)
+        {
+            value = v;
+        }
 
-			Half(uint16 v)
-			{
-				value = v;
-			}
+        TERATHON_API float GetFloat(void) const;
+        TERATHON_API void  SetFloat(float v) volatile;
 
-			TERATHON_API float GetFloat(void) const;
-			TERATHON_API void SetFloat(float v) volatile;
+    public:
+        inline Half() = default;
 
-		public:
+        Half(const Half& h)
+        {
+            value = h.value;
+        }
 
-			inline Half() = default;
+        Half(float v)
+        {
+            SetFloat(v);
+        }
 
-			Half(const Half& h)
-			{
-				value = h.value;
-			}
+        Half(double v)
+        {
+            SetFloat(float(v));
+        }
 
-			Half(float v)
-			{
-				SetFloat(v);
-			}
+        operator float(void) const
+        {
+            return (GetFloat());
+        }
 
-			Half(double v)
-			{
-				SetFloat(float(v));
-			}
+        inline Half& operator=(const Half& h)
+        {
+            value = h.value;
+            return (*this);
+        }
 
-			operator float(void) const
-			{
-				return (GetFloat());
-			}
+        Half& operator=(float v)
+        {
+            SetFloat(v);
+            return (*this);
+        }
 
-			inline Half& operator =(const Half& h)
-			{
-				value = h.value;
-				return (*this);
-			}
+        void operator=(float v) volatile
+        {
+            SetFloat(v);
+        }
 
-			Half& operator =(float v)
-			{
-				SetFloat(v);
-				return (*this);
-			}
+        Half& operator=(double v)
+        {
+            SetFloat(float(v));
+            return (*this);
+        }
 
-			void operator =(float v) volatile
-			{
-				SetFloat(v);
-			}
+        void operator=(double v) volatile
+        {
+            SetFloat(float(v));
+        }
 
-			Half& operator =(double v)
-			{
-				SetFloat(float(v));
-				return (*this);
-			}
+        friend Half operator-(const Half& h);
+    };
 
-			void operator =(double v) volatile
-			{
-				SetFloat(float(v));
-			}
+    inline Half operator-(const Half& h)
+    {
+        return (Half(uint16(h.value ^ 0x8000)));
+    }
 
-			friend Half operator -(const Half& h);
-	};
+    inline const Half& ashalf(const int16& i)
+    {
+        return (reinterpret_cast<const Half&>(i));
+    }
 
-
-	inline Half operator -(const Half& h)
-	{
-		return (Half(uint16(h.value ^ 0x8000)));
-	}
-
-
-	inline const Half& ashalf(const int16& i)
-	{
-		return (reinterpret_cast<const Half&>(i));
-	}
-
-	inline const Half& ashalf(const uint16& i)
-	{
-		return (reinterpret_cast<const Half&>(i));
-	}
-}
-
-
-#endif
+    inline const Half& ashalf(const uint16& i)
+    {
+        return (reinterpret_cast<const Half&>(i));
+    }
+} // namespace Terathon
