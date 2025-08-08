@@ -14,6 +14,7 @@
 #include "TSData.h"
 #include "TSTree.h"
 
+#include <string>
 #include <unordered_map>
 
 #define TERATHON_OPENDDL 1
@@ -46,6 +47,25 @@ namespace Terathon
         kDataInvalidPropertyValue = 'IVPV',   ///< The value specified for a property is invalid.
         kDataBrokenReference = 'BREF'         ///< The target of a reference does not exist.
     };
+
+    inline std::string DataResultToString(DataResult result)
+    {
+        switch (result)
+        {
+        case kDataMissingSubstructure:
+            return "Missing substructure";
+        case kDataExtraneousSubstructure:
+            return "Extraneous substructure";
+        case kDataInvalidDataFormat:
+            return "Invalid data format";
+        case kDataInvalidPropertyValue:
+            return "Invalid property value";
+        case kDataBrokenReference:
+            return "Broken reference";
+        default:
+            return "Unknown data result";
+        }
+    }
 
     class DataDescription;
 
